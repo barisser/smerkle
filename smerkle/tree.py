@@ -43,8 +43,14 @@ class SMT:
 		"""
 		Adds to an arbitrary, not-necessarily leaf node at the N'th node at depth.
 		Also performs hashes recurively upward.
+		You are not allowed to modify a node that is the parent of another from the outside,
+		otherwise you will break the relationship.  Existing hashes can only be overwritten
+		when working upwards recursively.
 		"""
 		m = int_to_binarray(n, depth)
+		if tuple(m) in self.hashes:
+			raise Exception("Cannot directly modify occupied hashes.")
+
 		self.hashes[tuple(m)] = self.hash(value)
 
 		while len(m) > 0:
