@@ -1,0 +1,3 @@
+# Smerkle
+
+## Sparse Merkle Trees
