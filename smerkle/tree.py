@@ -90,3 +90,28 @@ class SMT:
 
 	def root(self):
 		return self.hashes[()]
+
+
+	def sparse_dump(self):
+		"""
+		Dump the minimal amount of data necessary to reconstruct the FULL tree.
+		"""
+		dump = {}
+		for coord in self.hashes.keys():
+			if len(coord) + 1 == self.max_depth: # these are child nodes
+				dump[coord] = self.hashes[coord]
+			else:
+				left = coord + (0,)
+				right = coord + (1,)
+				if not left in self.hashes and not right in self.hashes: # this point was defined but not at the bottom layer, should be included in dump
+					dump[coord] = self.hashes[coord]
+
+		# TODO make this base64 rather than a dict
+		return dump
+
+	def from_dump(self, dump):
+		"""
+		Populates the tree from a sparse b64-encoded dump.
+		"""
+		# TODO
+		return

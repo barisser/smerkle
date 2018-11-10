@@ -18,8 +18,6 @@ import zlib
 
 
 
-
-
 class BF:
 	def __init__(self, max_elements, error_rate):
 		self.error_rate = error_rate
