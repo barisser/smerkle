@@ -62,6 +62,15 @@ class SMT:
 			self.hashes[tuple(m)] = self.hash(lhash + rhash)
 
 
+	def add_node_set(self, nodeset):
+		"""
+		Adds a list of nodes and computes more efficiently.
+		A list of nodes is composed of a list of [n, depth, value]
+		"""
+		# TODO
+		return
+
+
 	def path(self, n, depth):
 		"""
 		Returns a merkle path from n, depth to root.

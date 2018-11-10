@@ -1,3 +1,6 @@
+import random
+import time
+
 import smerkle
 
 def test_creation_of_tree():
@@ -14,3 +17,13 @@ def test_creation_of_tree():
 		assert smerkle.verify_path(path)
 		assert path[-1] == tree.root()
 
+
+def test_perf():
+	tree = smerkle.SMT()
+
+	start = time.time()
+	for i in range(2000):
+		n = random.randint(0, 2**254)
+		tree.add_node(n, 255, str(i) + 'test')
+	duration = time.time() - start
+	print(duration)
