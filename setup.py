@@ -9,6 +9,5 @@ setup(name='smerkle',
       license='MIT',
       packages=find_packages(),
       install_requires=[
-            'bloom_filter'
       ]
       )

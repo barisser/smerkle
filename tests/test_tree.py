@@ -22,7 +22,7 @@ def test_perf():
 	tree = smerkle.SMT()
 
 	start = time.time()
-	for i in range(2000):
+	for i in range(20):
 		n = random.randint(0, 2**254)
 		tree.add_node(n, 255, str(i) + 'test')
 	duration = time.time() - start
