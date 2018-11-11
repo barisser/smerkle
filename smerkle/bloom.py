@@ -21,6 +21,7 @@ import zlib
 class BF:
 	def __init__(self, max_elements, error_rate):
 		self.error_rate = error_rate
+		self.n_elements = 0
 		self.max_elements = max_elements
 		self.m = math.ceil(max_elements * -1.44 * math.log(error_rate) / math.log(2))
 		self.array = [0] * self.m
@@ -40,6 +41,10 @@ class BF:
 		return sig
 
 	def add(self, value):
+		self.n_elements += 1
+		if self.n_elements > self.max_elements:
+			raise Exception("Cannot exceed max elements in Bloom Filter.")
+		
 		for i in range(self.k):
 			hv = int(self.hash_functions[i](value), 16) % self.m
 			self.array[hv] = 1

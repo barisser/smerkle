@@ -23,6 +23,7 @@ def verify_path(path, hashfunction=DEFAULT_HASH_FUNCTION):
 class SMT:
 	def __init__(self, max_depth=256, hashfunction=DEFAULT_HASH_FUNCTION):
 		self.hashes = {}
+		self.n_elements = 0
 		self.max_depth = max_depth
 		self.hash = hashfunction
 		
@@ -60,6 +61,11 @@ class SMT:
 			lhash = self.read_hash(left)
 			rhash = self.read_hash(right)
 			self.hashes[tuple(m)] = self.hash(lhash + rhash)
+
+		self.n_elements += 1
+
+	def add_to_next_leaf(self, value):
+		self.add_node(self.n_elements, self.max_depth, value) # technically nodes added at non-leaves make this non-monotonic, but OK.
 
 
 	def add_node_set(self, nodeset):
