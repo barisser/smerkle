@@ -23,10 +23,10 @@ class BF:
 		self.error_rate = error_rate
 		self.n_elements = 0
 		self.max_elements = max_elements
-		self.m = math.ceil(max_elements * -1.44 * math.log(error_rate) / math.log(2))
+		self.m = int(math.ceil(max_elements * -1.44 * math.log(error_rate) / math.log(2)))
 		self.array = [0] * self.m
 
-		self.k = math.ceil(-1 * math.log(error_rate) / math.log(2))
+		self.k = int(math.ceil(-1 * math.log(error_rate) / math.log(2)))
 		self.hash_functions = []
 		for y in range(self.k):
 			h = " " * y

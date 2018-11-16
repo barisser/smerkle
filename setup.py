@@ -9,5 +9,6 @@ setup(name='smerkle',
       license='MIT',
       packages=find_packages(),
       install_requires=[
+            'pycrypto'
       ]
       )
