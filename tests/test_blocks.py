@@ -9,3 +9,10 @@ def test_mine_block():
 
 def test_blockchain():
 	blockchain = smerkle.BlockChain()
+	assert len(blockchain.blocks) == 1
+	genesis_block = blockchain.blocks.values()[0]
+	assert genesis_block.prev_blockhash == smerkle.block.ROOT_HASH
+	assert genesis_block.height == 0
+	assert genesis_block.hash == blockchain.blocks.keys()[0]
+	import pdb;pdb.set_trace()
+	blockchain.mine()
