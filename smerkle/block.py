@@ -21,6 +21,7 @@ import smerkle.tree as tree
 
 import datetime
 import hashlib
+import time
 
 import networkx as nx
 
@@ -31,8 +32,9 @@ SMT_DEPTH = 256
 ROOT_HASH = '0000000000000000000000000000000000000000000000000000000000000000'
 STARTING_DIFFICULTY = 1
 
-BLOCK_PERIOD = 5
-BLOCK_DIFFULTY_LOOKBACK = 100
+BLOCK_PERIOD = 1
+BLOCK_DIFFULTY_LOOKBACK = 5
+DIFFICULTY_RECALCULATION_PERIOD = 5 # every 10 blocks
 
 class Transaction:
     def __init__(self, sender, to, coin_id, blockhash):
@@ -82,7 +84,7 @@ class Block:
 
     def mine(self, max_n=None):
         assert self.prev_blockhash is not None
-        self.timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S') # UTC
+        self.timestamp = int(time.time() * 1000) / 1000.0
         nonce = 0
         passed = False
         params = [self.tree.root, hashlib.sha256(self.bloom_filter.to_string().encode()).hexdigest(), self.difficulty, self.nonce, self.timestamp]
@@ -93,6 +95,7 @@ class Block:
             if passed:
                 print("Difficulty reached: " + str(115792089237316195423570985008687907853269984665640564039457584007913129639936/r))
                 self.hash = hashlib.sha256(":".join(map(str, params)).encode()).hexdigest()
+                self.nonce = nonce
                 print("solved block difficulty {0} with hash {1}".format(self.difficulty, self.hash))
 
         return passed
@@ -110,6 +113,7 @@ class BlockChain:
         self.next_block = None
         self.last_block_height = -1
         self.next_difficulty = 1 # TODO
+        self.last_difficulty_calculation = 0
 
         self.add_genesis_block()
 
@@ -120,14 +124,22 @@ class BlockChain:
         """
         dt = 0
         n = 0
+
+        if self.last_difficulty_calculation + DIFFICULTY_RECALCULATION_PERIOD > self.last_block_height:
+            return
+
         nextblock = self.last_blockhash
         for i in range(BLOCK_DIFFULTY_LOOKBACK):
             parent = self.blocks[nextblock].prev_blockhash
             if parent == ROOT_HASH:
                 break
             n += 1
-            import pdb;pdb.set_trace()
-
+            dt += self.blocks[nextblock].timestamp - self.blocks[parent].timestamp
+        if n > 0:
+            self.last_difficulty_calculation = self.last_block_height
+            avg_time_per_block = dt / float(n)
+            self.next_difficulty = self.next_difficulty * (BLOCK_PERIOD / avg_time_per_block)
+            print("New difficulty = {0}".format(self.next_difficulty))
 
     def add_genesis_block(self):
         genesis = Block(ROOT_HASH, STARTING_DIFFICULTY)
@@ -149,11 +161,13 @@ class BlockChain:
         self.next_block = None
 
 
-    def mine(self):
-        self.decide_difficulty()
-        if self.next_block is None:
-            self.next_block = Block(self.last_blockhash, self.next_difficulty)
+    def mine(self, n=1):
+        for _ in range(n):
+            if self.next_block is None:
+                self.next_block = Block(self.last_blockhash, self.next_difficulty)
 
-        passed = self.next_block.mine()
-        if passed:
-            self.add_block(self.next_block)
+            passed = self.next_block.mine()
+            if passed:
+                self.add_block(self.next_block)
+                #import pdb;pdb.set_trace()
+                self.decide_difficulty()

@@ -14,5 +14,4 @@ def test_blockchain():
 	assert genesis_block.prev_blockhash == smerkle.block.ROOT_HASH
 	assert genesis_block.height == 0
 	assert genesis_block.hash == blockchain.blocks.keys()[0]
-	import pdb;pdb.set_trace()
-	blockchain.mine()
+	blockchain.mine(20)
