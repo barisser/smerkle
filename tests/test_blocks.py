@@ -15,3 +15,8 @@ def test_blockchain():
 	assert genesis_block.height == 0
 	assert genesis_block.hash == blockchain.blocks.keys()[0]
 	blockchain.mine(20)
+
+
+def test_address():
+	account = smerkle.Account('test')
+	assert account.address == '1HKqKTMpBTZZ8H5zcqYEWYBaaWELrDEXeE'

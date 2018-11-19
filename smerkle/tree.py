@@ -67,6 +67,11 @@ class SMT:
 	def add_to_next_leaf(self, value):
 		self.add_node(self.n_elements, self.max_depth, value) # technically nodes added at non-leaves make this non-monotonic, but OK.
 
+	def add_to_leaf(self, value, position):
+		"""
+		Adds the hash of value X to leaf node position.
+		"""
+		self.add_node(position, self.max_depth, value)
 
 	def add_node_set(self, nodeset):
 		"""
