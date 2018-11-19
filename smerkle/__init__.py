@@ -1,4 +1,4 @@
-from smerkle.tree import SMT, verify_path
-from smerkle.bloom import BF
+from smerkle.tree import *
+from smerkle.bloom import *
 from smerkle.acc import *
 from smerkle.block import *

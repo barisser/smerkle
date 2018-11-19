@@ -1,4 +1,7 @@
+import base64
 import hashlib
+import json
+import zlib
 
 DEFAULT_HASH_FUNCTION = lambda x: hashlib.sha256(str(x).encode()).hexdigest()
 
@@ -9,6 +12,11 @@ def int_to_binarray(x, d):
 	m = [int(s) for s in bin(x)[2:]]
 	return [0] * (d - len(m)) + m
 
+def binarray_to_int(x):
+	s = 0
+	for k in x:
+		s = s * 2 + k
+	return s
 
 def verify_path(path, hashfunction=DEFAULT_HASH_FUNCTION):
 	for i in range(0, len(path) - 1):
@@ -21,7 +29,7 @@ def verify_path(path, hashfunction=DEFAULT_HASH_FUNCTION):
 
 
 class SMT:
-	def __init__(self, max_depth=256, hashfunction=DEFAULT_HASH_FUNCTION):
+	def __init__(self, max_depth=256, hashfunction=DEFAULT_HASH_FUNCTION, dump=None):
 		self.hashes = {}
 		self.n_elements = 0
 		self.max_depth = max_depth
@@ -34,6 +42,10 @@ class SMT:
 		for i in range(1, max_depth):
 			j = max_depth - i
 			self.empty_hashes[j] = self.hash(self.empty_hashes[j+1] * 2)
+
+		if dump is not None:
+			self.from_string(dump)
+
 
 
 	def read_hash(self, coordinate):
@@ -109,20 +121,43 @@ class SMT:
 		"""
 		dump = {}
 		for coord in self.hashes.keys():
+			intcoord = binarray_to_int(coord)
 			if len(coord) + 1 == self.max_depth: # these are child nodes
-				dump[coord] = self.hashes[coord]
+				dump[intcoord] = self.hashes[coord]
 			else:
 				left = coord + (0,)
 				right = coord + (1,)
 				if not left in self.hashes and not right in self.hashes: # this point was defined but not at the bottom layer, should be included in dump
-					dump[coord] = self.hashes[coord]
+					dump[intcoord] = self.hashes[coord]
 
 		# TODO make this base64 rather than a dict
 		return dump
 
-	def from_dump(self, dump):
+	def to_string(self):
+		dump = self.sparse_dump()
+		dump['max_depth'] = self.max_depth
+		s = str(json.dumps(dump))
+		zs = zlib.compress(s)
+		return base64.b64encode(zs)
+
+	def from_string(self, dump):
 		"""
 		Populates the tree from a sparse b64-encoded dump.
+		Assumes all data is at leaf nodes.
 		"""
 		# TODO
-		return
+		j = base64.b64decode(dump)
+		q = zlib.decompress(j)
+		r = json.loads(q)
+
+		self.hashes = {}
+		self.n_elements = 0
+
+		for k in r:
+			if k == 'max_depth':
+				self.max_depth = r[k]
+			else:
+				self.add_to_leaf(r[k], int(k))
+				# w = int_to_binarray(int(k), self.max_depth)
+				# self.hashes[tuple(w)] = r[k]
+				# self.n_elements += 1

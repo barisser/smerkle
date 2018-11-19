@@ -114,6 +114,9 @@ class Block:
 
 
     def serialize(self):
+        d = self.__dict__
+        d['bloom_filter'] = self.bloom_filter.to_string()
+        #d['tree'] = 
         return
 
 

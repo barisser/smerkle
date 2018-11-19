@@ -6,6 +6,7 @@ def test_mine_block():
 	block.mine()
 	assert block.hash is not None
 	block.verify()
+	#assert block.serialize == ''
 
 def test_blockchain():
 	blockchain = smerkle.BlockChain()
@@ -14,7 +15,7 @@ def test_blockchain():
 	assert genesis_block.prev_blockhash == smerkle.block.ROOT_HASH
 	assert genesis_block.height == 0
 	assert genesis_block.hash == blockchain.blocks.keys()[0]
-	blockchain.mine(20)
+	blockchain.mine(10)
 
 
 def test_address():
