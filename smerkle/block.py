@@ -23,7 +23,9 @@ import datetime
 import hashlib
 import time
 
+import ecdsa
 import networkx as nx
+import pybitcoin
 
 MAX_ELEMENTS = 2*10**4
 ERROR_RATE = 10**-9
@@ -35,6 +37,15 @@ STARTING_DIFFICULTY = 1
 BLOCK_PERIOD = 1
 BLOCK_DIFFULTY_LOOKBACK = 5
 DIFFICULTY_RECALCULATION_PERIOD = 5 # every 10 blocks
+
+
+class Account:
+    def __init__(self, secret):
+        self.secret = secret
+        self.privkey = pybitcoin.BitcoinPrivateKey.from_passphrase(secret)
+        self.pubkey = self.privkey.public_key().to_hex()
+        self.address = self.privkey.public_key().address()
+
 
 class Transaction:
     def __init__(self, sender, to, coin_id, blockhash):
@@ -69,8 +80,9 @@ class Block:
         self.timestamp = None
         self.height = None
 
-    def add_tx(self, tx_id):
-        self.tree.add_to_next_leaf(tx_id)
+    def add_tx(self, transaction):
+        self.tree.add_to_leaf(value, position)
+
 
     def add_tx_filter(self, transaction_signature):
         self.bloom_filter.add(transaction_signature)
@@ -102,6 +114,9 @@ class Block:
 
 
     def serialize(self):
+        d = self.__dict__
+        d['bloom_filter'] = self.bloom_filter.to_string()
+        #d['tree'] = 
         return
 
 

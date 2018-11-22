@@ -17,6 +17,11 @@ def test_creation_of_tree():
 		assert smerkle.verify_path(path)
 		assert path[-1] == tree.root()
 
+	dump = tree.to_string()
+#	import pdb;pdb.set_trace()
+	tree2 = smerkle.SMT(dump=dump)
+	assert tree2.root() == tree.root()
+
 
 def test_perf():
 	tree = smerkle.SMT()
