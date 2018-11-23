@@ -24,6 +24,7 @@ import copy
 import datetime
 import hashlib
 import json
+import sqlite3
 import time
 import zlib
 
@@ -205,3 +206,5 @@ class BlockChain:
             if passed:
                 self.add_block(self.next_block)
                 self.decide_difficulty()
+
+#    def to_path(self, folder_path):
