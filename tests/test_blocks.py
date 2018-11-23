@@ -30,7 +30,7 @@ def test_blockchain():
 
 	blockchain2 = smerkle.BlockChain()
 	blockchain2.from_path(folder_path)
-	import pdb;pdb.set_trace()
+	assert set(blockchain.blocks.keys()) == set(blockchain2.blocks.keys())
 
 
 def test_address():

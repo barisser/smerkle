@@ -223,15 +223,20 @@ class BlockChain:
         blocks_file = open(os.path.join(folder_path, 'blocks'), 'w')
         for block in self.blocks:
             blocks_file.write(self.blocks[block].to_string())
-            blocks_file.write('\n')
+            blocks_file.write(';')
 
     def from_path(self, folder_path):
+        self.blocks = {}
         meta = json.loads(open(os.path.join(folder_path, 'meta.json')).read())
         for k in meta:
             setattr(self, k, meta[k])
 
         blocks_fh = open(os.path.join(folder_path, 'blocks'))
-        blockstring = blocks_fh.readline()
-        block = block_from_string(blockstring)
-        self.blocks[block.hash] = block
+        blockstring = blocks_fh.read()
+        block_strings = blockstring.split(';')
+        for bs in block_strings:
+            if len(bs) == 0:
+                continue
+            block = block_from_string(bs)
+            self.blocks[str(block.hash)] = block
 
