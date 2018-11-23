@@ -147,7 +147,6 @@ class SMT:
 
 		self.hashes = {}
 		self.n_elements = 0
-		import pdb;pdb.set_trace()
 
 		for k in r:
 			if k == 'max_depth':
