@@ -19,9 +19,13 @@ and p is the false positive rate
 import smerkle.bloom as bloom
 import smerkle.tree as tree
 
+import base64
+import copy
 import datetime
 import hashlib
+import json
 import time
+import zlib
 
 import ecdsa
 import networkx as nx
@@ -67,9 +71,23 @@ def pow(difficulty, *args):
     return r <= 115792089237316195423570985008687907853269984665640564039457584007913129639936 / difficulty, r
 
 
+def block_from_string(blockstring):
+    j = base64.b64decode(blockstring)
+    q = zlib.decompress(j)
+    r = json.loads(q)
+    block = Block(r['prev_blockhash'], r['difficulty'], r['height'])
+    block.nonce = r['nonce']
+    block.hash = r['hash']
+    block.timestamp = r['timestamp']
+    block.tree = tree.SMT(max_depth=SMT_DEPTH)
+    block.tree.from_string(r['tree'])
+    block.bloom_filter = bloom.BF(MAX_ELEMENTS, ERROR_RATE)
+    block.bloom_filter.from_string(r['bloom_filter'])
+    return block
+
 
 class Block:
-    def __init__(self, prev_blockhash, difficulty):
+    def __init__(self, prev_blockhash, difficulty, height):
         self.prev_blockhash = prev_blockhash
 
         self.tree = tree.SMT(max_depth=SMT_DEPTH)
@@ -78,11 +96,10 @@ class Block:
         self.nonce = None
         self.hash = None
         self.timestamp = None
-        self.height = None
+        self.height = height
 
     def add_tx(self, transaction):
         self.tree.add_to_leaf(value, position)
-
 
     def add_tx_filter(self, transaction_signature):
         self.bloom_filter.add(transaction_signature)
@@ -93,6 +110,7 @@ class Block:
         if not passes and self.hash == blockhash:
             raise Exception("Invalid Block.")
         return blockhash
+
 
     def mine(self, max_n=None):
         assert self.prev_blockhash is not None
@@ -113,11 +131,13 @@ class Block:
         return passed
 
 
-    def serialize(self):
-        d = self.__dict__
+    def to_string(self):
+        d = copy.copy(self.__dict__)
         d['bloom_filter'] = self.bloom_filter.to_string()
-        #d['tree'] = 
-        return
+        d['tree'] = self.tree.to_string()
+        s = json.dumps(d)
+        return base64.b64encode(zlib.compress(s))
+
 
 
 class BlockChain:
@@ -157,7 +177,7 @@ class BlockChain:
             print("New difficulty = {0}".format(self.next_difficulty))
 
     def add_genesis_block(self):
-        genesis = Block(ROOT_HASH, STARTING_DIFFICULTY)
+        genesis = Block(ROOT_HASH, STARTING_DIFFICULTY, 0)
         genesis.height = 0
         genesis.mine()
         self.blocks[genesis.hash] = genesis
@@ -179,10 +199,9 @@ class BlockChain:
     def mine(self, n=1):
         for _ in range(n):
             if self.next_block is None:
-                self.next_block = Block(self.last_blockhash, self.next_difficulty)
+                self.next_block = Block(self.last_blockhash, self.next_difficulty, self.last_block_height + 1)
 
             passed = self.next_block.mine()
             if passed:
                 self.add_block(self.next_block)
-                #import pdb;pdb.set_trace()
                 self.decide_difficulty()

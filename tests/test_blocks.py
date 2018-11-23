@@ -2,11 +2,15 @@ import smerkle
 
 
 def test_mine_block():
-	block = smerkle.Block(smerkle.ROOT_HASH, 1000)
+	block = smerkle.Block(smerkle.ROOT_HASH, 1000, 0)
 	block.mine()
 	assert block.hash is not None
 	block.verify()
-	#assert block.serialize == ''
+	block_string = block.to_string()
+
+	block2 = smerkle.block_from_string(block_string)
+	assert block.to_string() == block2.to_string()
+
 
 def test_blockchain():
 	blockchain = smerkle.BlockChain()
