@@ -1,3 +1,6 @@
+import os
+import time
+
 import smerkle
 
 
@@ -20,6 +23,14 @@ def test_blockchain():
 	assert genesis_block.height == 0
 	assert genesis_block.hash == blockchain.blocks.keys()[0]
 	blockchain.mine(10)
+
+	folder_path = "./bc_{0}".format(int(time.time()))
+	os.system('mkdir {0}'.format(folder_path))
+	blockchain.to_path(folder_path)
+
+	blockchain2 = smerkle.BlockChain()
+	blockchain2.from_path(folder_path)
+	assert set(blockchain.blocks.keys()) == set(blockchain2.blocks.keys())
 
 
 def test_address():

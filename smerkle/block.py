@@ -24,6 +24,8 @@ import copy
 import datetime
 import hashlib
 import json
+import os
+import sqlite3
 import time
 import zlib
 
@@ -130,7 +132,6 @@ class Block:
 
         return passed
 
-
     def to_string(self):
         d = copy.copy(self.__dict__)
         d['bloom_filter'] = self.bloom_filter.to_string()
@@ -205,3 +206,37 @@ class BlockChain:
             if passed:
                 self.add_block(self.next_block)
                 self.decide_difficulty()
+
+    def meta_to_string(self):
+        metadata = {}
+        for k in self.__dict__:
+            if not k in ['blocks', 'graph']:
+                metadata[k] = self.__dict__[k]
+        return json.dumps(metadata)
+
+
+    def to_path(self, folder_path):
+        meta_file = open(os.path.join(folder_path, 'meta.json'), 'w')
+        meta_file.write(self.meta_to_string())
+        meta_file.close()
+
+        blocks_file = open(os.path.join(folder_path, 'blocks'), 'w')
+        for block in self.blocks:
+            blocks_file.write(self.blocks[block].to_string())
+            blocks_file.write(';')
+
+    def from_path(self, folder_path):
+        self.blocks = {}
+        meta = json.loads(open(os.path.join(folder_path, 'meta.json')).read())
+        for k in meta:
+            setattr(self, k, meta[k])
+
+        blocks_fh = open(os.path.join(folder_path, 'blocks'))
+        blockstring = blocks_fh.read()
+        block_strings = blockstring.split(';')
+        for bs in block_strings:
+            if len(bs) == 0:
+                continue
+            block = block_from_string(bs)
+            self.blocks[str(block.hash)] = block
+
