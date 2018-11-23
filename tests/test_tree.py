@@ -18,7 +18,6 @@ def test_creation_of_tree():
 		assert path[-1] == tree.root()
 
 	dump = tree.to_string()
-#	import pdb;pdb.set_trace()
 	tree2 = smerkle.SMT(dump=dump)
 	assert tree2.root() == tree.root()
 
@@ -27,11 +26,11 @@ def test_perf():
 	tree = smerkle.SMT()
 
 	start = time.time()
-	for i in range(200):
+	for i in range(20):
 		n = random.randint(0, 2**254)
 		tree.add_node(n, 255, str(i) + 'test')
 	duration = time.time() - start
 	print(duration)
 
 	dump = tree.sparse_dump()
-	assert len(dump) == 200 # number of elements exactly!
+	assert len(dump) == 20 # number of elements exactly!

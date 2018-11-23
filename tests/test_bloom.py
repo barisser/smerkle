@@ -18,13 +18,3 @@ def test_bloom_filter():
 
 	root = bf.to_string()
 	barray = bf.array
-	# bf.from_string(root)
-	# assert bf.to_string() == root
-	# for i in range(len(bf.array)):
-	# 	assert bf.array[i] == barray[i]
-
-	# for i in range(n):
-	# 	assert bf.check(str(i))
-
-	# for i in range(n, int(n + (1 / p) / 1000)):
-	# 	assert not bf.check(str(i))
