@@ -34,6 +34,7 @@ class SMT:
 		self.n_elements = 0
 		self.max_depth = max_depth
 		self.hash = hashfunction
+		self.leaf_nodes = set()
 		
 		self.empty_hashes = dict()
 		self.empty_hashes[max_depth] = self.hash(max_depth)
@@ -52,7 +53,7 @@ class SMT:
 		return self.hashes.get(tuple(coordinate), self.empty_hashes[len(coordinate)])
 
 
-	def add_node(self, n, depth, value):
+	def add_node(self, n, depth, value, hash=True):
 		"""
 		Adds to an arbitrary, not-necessarily leaf node at the N'th node at depth.
 		Also performs hashes recurively upward.
@@ -64,7 +65,8 @@ class SMT:
 		if tuple(m) in self.hashes:
 			raise Exception("Cannot directly modify occupied hashes.")
 
-		self.hashes[tuple(m)] = self.hash(value)
+		self.hashes[tuple(m)] = self.hash(value) if hash else value
+		self.leaf_nodes.add((n, depth))
 
 		while len(m) > 0:
 			m = m[:-1]
@@ -119,19 +121,12 @@ class SMT:
 		"""
 		Dump the minimal amount of data necessary to reconstruct the FULL tree.
 		"""
-		dump = {}
-		for coord in self.hashes.keys():
-			intcoord = binarray_to_int(coord)
-			if len(coord) + 1 == self.max_depth: # these are child nodes
-				dump[intcoord] = self.hashes[coord]
-			else:
-				left = coord + (0,)
-				right = coord + (1,)
-				if not left in self.hashes and not right in self.hashes: # this point was defined but not at the bottom layer, should be included in dump
-					dump[intcoord] = self.hashes[coord]
-
-		# TODO make this base64 rather than a dict
-		return dump
+		d = {}
+		for k in self.leaf_nodes:
+			n, depth = k
+			b = tuple(int_to_binarray(n, depth))
+			d[str(k)] = self.hashes[b]
+		return d
 
 	def to_string(self):
 		dump = self.sparse_dump()
@@ -157,7 +152,8 @@ class SMT:
 			if k == 'max_depth':
 				self.max_depth = r[k]
 			else:
-				self.add_to_leaf(r[k], int(k))
+				n, depth = eval(k)
+				self.add_node(n, depth, r[k], hash=False)
 				# w = int_to_binarray(int(k), self.max_depth)
 				# self.hashes[tuple(w)] = r[k]
 				# self.n_elements += 1
