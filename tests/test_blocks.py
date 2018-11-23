@@ -28,6 +28,10 @@ def test_blockchain():
 	os.system('mkdir {0}'.format(folder_path))
 	blockchain.to_path(folder_path)
 
+	blockchain2 = smerkle.BlockChain()
+	blockchain2.from_path(folder_path)
+	import pdb;pdb.set_trace()
+
 
 def test_address():
 	account = smerkle.Account('test')
