@@ -1,4 +1,5 @@
 import base64
+import copy
 import hashlib
 import json
 import zlib
@@ -18,8 +19,9 @@ def binarray_to_int(x):
 		s = s * 2 + k
 	return s
 
-def verify_path(path, hashfunction=DEFAULT_HASH_FUNCTION):
-	for i in range(0, len(path) - 1):
+def verify_path(path, root, hashfunction=DEFAULT_HASH_FUNCTION):
+	assert path[0] in path[1]
+	for i in range(1, len(path) - 1):
 		left = path[i][0]
 		right = path[i][1]
 		expected_parent = hashfunction(left + right)
@@ -28,8 +30,45 @@ def verify_path(path, hashfunction=DEFAULT_HASH_FUNCTION):
 	return True
 
 
+def infer_position(cpath, root, hashfunction=DEFAULT_HASH_FUNCTION):
+	"""
+	For a given path, infer the depth and n positions of the path.
+	returns (depth, n)
+	"""
+	binarray = []
+	path = copy.copy(cpath)
+	lasthash = path.pop(0)
+	while path:
+		lhash, rhash = path.pop(0)
+		if lhash == lasthash:
+			binarray.append(0)
+		elif rhash == lasthash:
+			binarray.append(1)
+		else:
+			raise Exception("Invalid Path")
+
+		lasthash = hashfunction(lhash + rhash)
+
+	binarray.reverse()
+	n = binarray_to_int(binarray)
+	depth = len(cpath[1:])
+	return depth, n
+
+
+def verify_membership(value, path, root, depth=None, n=None, hashfunction=DEFAULT_HASH_FUNCTION):
+	"""
+	For a given hashfunction, root of a merkle tree, and path
+	return True False whether the value is a member of the tree with this root.
+	If depth and n positions are specified, will also assert that these positions are correct.
+	If they are not specified, will infer these from path.
+	"""
+	return
+
+
+
+
 class SMT:
-	def __init__(self, max_depth=256, hashfunction=DEFAULT_HASH_FUNCTION, dump=None):
+	def __init__(self, max_depth=64, hashfunction=DEFAULT_HASH_FUNCTION, dump=None):
 		self.hashes = {}
 		self.n_elements = 0
 		self.max_depth = max_depth
@@ -60,6 +99,8 @@ class SMT:
 		You are not allowed to modify a node that is the parent of another from the outside,
 		otherwise you will break the relationship.  Existing hashes can only be overwritten
 		when working upwards recursively.
+
+		Returns the Merkle Path.
 		"""
 		m = int_to_binarray(n, depth)
 		if tuple(m) in self.hashes:
@@ -67,6 +108,7 @@ class SMT:
 
 		self.hashes[tuple(m)] = self.hash(value) if hash else value
 		self.leaf_nodes.add((n, depth))
+		path = [self.hashes[tuple(m)]]
 
 		while len(m) > 0:
 			m = m[:-1]
@@ -75,8 +117,11 @@ class SMT:
 			lhash = self.read_hash(left)
 			rhash = self.read_hash(right)
 			self.hashes[tuple(m)] = self.hash(lhash + rhash)
+			path.append([lhash, rhash])
 
 		self.n_elements += 1
+		return path
+
 
 	def add_to_next_leaf(self, value):
 		self.add_node(self.n_elements, self.max_depth, value) # technically nodes added at non-leaves make this non-monotonic, but OK.
@@ -99,17 +144,18 @@ class SMT:
 	def path(self, n, depth):
 		"""
 		Returns a merkle path from n, depth to root.
-		The format of the path is an array of [LEFT VALUE, RIGHT VALUE] followed by a single [roothash]
+		The format of the path is an array of [LEFT VALUE, RIGHT VALUE].
+		Except the first value is the leaf hash since this is not clear otherwise.
+		The root hash is ommitted because it is implied by final left-right pair.
 		"""
 		m = int_to_binarray(n, depth)
-		path = []
+		path = [self.read_hash(m)]
 
 		while len(m) > 0:
 			m = m[:-1]
 			left = m + [0]
 			right = m + [1]
 			path.append([self.read_hash(left), self.read_hash(right)])
-		path.append(self.hashes[()])
 
 		return path
 
