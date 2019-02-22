@@ -1,3 +1,5 @@
+import copy
+import hashlib
 import random
 import time
 
@@ -9,7 +11,7 @@ def test_creation_of_tree():
 	for i in range(100):
 		m = i * 130
 		tree.add_node(m, 40, str(i) + 'hello')
-	assert tree.root() == '45832e75f073304e6dc4e885f6e4f1f11d004949e633777c7cef48a8609448ce'
+	assert tree.root() == '48a827461588ee41a40cc2e102a4c996291eff1cf159a85927e1b96b4334f5a1'
 
 	for i in range(100):
 		m = i * 130
@@ -24,15 +26,25 @@ def test_creation_of_tree():
 
 def test_memberships():
 	tree = smerkle.SMT()
-
-	for i in range(100):
-		depth = 64
+	depth = 64
+	
+	for i in range(100):	
 		n = random.randint(0, 2**depth-1)
 		value = str(i)
 		path = tree.add_node(n, depth, value)
 		assert tree.path(n, depth) == path
-		assert smerkle.infer_position(path, tree.root()) == (depth, n)
+		assert smerkle.verify_membership(value, path, tree.root())
+		assert not smerkle.verify_membership(value, path, 'asdasd')
+		assert not smerkle.verify_membership('asdasd', path, tree.root())
+		fakepath = copy.copy(path)
+		fakepath[3][0] = hashlib.sha256('qweqw'.encode()).hexdigest()
+		assert not smerkle.verify_membership(value, fakepath, tree.root())
+#		assert smerkle.infer_position(path, tree.root()) == (depth, n)
 
+	for i in range(1000):
+		m = random.randint(0, 2**depth-1)
+		path = tree.path(n, depth)
+		import pdb;pdb.set_trace()
 
 
 def test_perf():

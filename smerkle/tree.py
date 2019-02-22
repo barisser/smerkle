@@ -9,24 +9,38 @@ DEFAULT_HASH_FUNCTION = lambda x: hashlib.sha256(str(x).encode()).hexdigest()
 def int_to_binarray(x, d):
 	"""
 	Finds the pathway for the X'th item in row D using zero based indexing.
+
+	root to leaf
 	"""
 	m = [int(s) for s in bin(x)[2:]]
-	return [0] * (d - len(m)) + m
+	x = [0] * (d - len(m)) + m
+	x.reverse()
+	return x
+
 
 def binarray_to_int(x):
 	s = 0
-	for k in x:
+	y = copy.copy(x)
+	y.reverse()
+	for k in y:
 		s = s * 2 + k
 	return s
 
+
 def verify_path(path, root, hashfunction=DEFAULT_HASH_FUNCTION):
-	assert path[0] in path[1]
+	if not path[0] in path[1]:
+		return False
+
 	for i in range(1, len(path) - 1):
 		left = path[i][0]
 		right = path[i][1]
 		expected_parent = hashfunction(left + right)
 		if expected_parent not in path[i+1]:
 			return False
+	
+	if not hashfunction(path[-1][0] + path[-1][1]) == root:
+		return False
+
 	return True
 
 
@@ -49,7 +63,6 @@ def infer_position(cpath, root, hashfunction=DEFAULT_HASH_FUNCTION):
 
 		lasthash = hashfunction(lhash + rhash)
 
-	binarray.reverse()
 	n = binarray_to_int(binarray)
 	depth = len(cpath[1:])
 	return depth, n
@@ -62,8 +75,12 @@ def verify_membership(value, path, root, depth=None, n=None, hashfunction=DEFAUL
 	If depth and n positions are specified, will also assert that these positions are correct.
 	If they are not specified, will infer these from path.
 	"""
-	return
+	verify_leaf = hashfunction(value) == path[0]
+	path_valid = verify_path(path, root)
 
+	# todo additional checks for position.
+
+	return verify_leaf and path_valid
 
 
 
@@ -87,6 +104,8 @@ class SMT:
 			self.from_string(dump)
 
 
+	def coordinate_is_empty(self, coordinate):
+		return tuple(coordinate) in self.hashes
 
 	def read_hash(self, coordinate):
 		return self.hashes.get(tuple(coordinate), self.empty_hashes[len(coordinate)])
@@ -120,6 +139,7 @@ class SMT:
 			path.append([lhash, rhash])
 
 		self.n_elements += 1
+		path.reverse()
 		return path
 
 
@@ -143,19 +163,26 @@ class SMT:
 
 	def path(self, n, depth):
 		"""
-		Returns a merkle path from n, depth to root.
+		Returns a merkle path from root, to n, depth coordinates.
 		The format of the path is an array of [LEFT VALUE, RIGHT VALUE].
 		Except the first value is the leaf hash since this is not clear otherwise.
 		The root hash is ommitted because it is implied by final left-right pair.
+
+		If N, depth is NULL, or any parents are NULL, provides whatever path is possible until default null values are hit.
 		"""
 		m = int_to_binarray(n, depth)
-		path = [self.read_hash(m)]
+		path = []
 
 		while len(m) > 0:
 			m = m[:-1]
 			left = m + [0]
 			right = m + [1]
+
+			# if self.coordinate_is_empty(m):
+			# 	path.
 			path.append([self.read_hash(left), self.read_hash(right)])
+
+		path.append(self.read_hash(int_to_binarray(n, depth)))
 
 		return path
 
