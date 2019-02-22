@@ -31,7 +31,7 @@ import zlib
 
 import ecdsa
 import networkx as nx
-import pybitcoin
+#import pybitcoin
 
 MAX_ELEMENTS = 2*10**4
 ERROR_RATE = 10**-9
@@ -48,9 +48,9 @@ DIFFICULTY_RECALCULATION_PERIOD = 5 # every 10 blocks
 class Account:
     def __init__(self, secret):
         self.secret = secret
-        self.privkey = pybitcoin.BitcoinPrivateKey.from_passphrase(secret)
-        self.pubkey = self.privkey.public_key().to_hex()
-        self.address = self.privkey.public_key().address()
+        # self.privkey = pybitcoin.BitcoinPrivateKey.from_passphrase(secret)
+        # self.pubkey = self.privkey.public_key().to_hex()
+        # self.address = self.privkey.public_key().address()
 
 
 class Transaction:
