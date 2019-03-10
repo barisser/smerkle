@@ -17,19 +17,20 @@ def mod_exp(a, b, n):
     Returns the result of
     (a ^ b) mod n
     """
-    result = 1
-    while True:
-        if b % 2 == 1:
-            result = (a * result) % n
+    bb = "{0:b}".format(b)
+    bc = [int(bb[i]) for i in range(len(bb))]
+    bc.reverse()
+    k = {0: a % n}
 
-        b = b / 2
+    for i in range(1, len(bc)):
+        k[i] = (k[i-1] ** 2) % n       
 
-        if b == 0:
-            break
+    r = 1
+    for m in range(len(bc)):
+        if bc[m] == 1:
+            r = r * k[m]
+    return r % n
 
-        a = (a * a) % n
-
-    return result
 
 
 def increment_membership_accumulator(acc, value, n):
