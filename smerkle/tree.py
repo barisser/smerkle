@@ -139,7 +139,6 @@ class SMT:
 			path.append([lhash, rhash])
 
 		self.n_elements += 1
-		path.reverse()
 		return path
 
 
@@ -163,6 +162,12 @@ class SMT:
 
 	def path(self, n, depth):
 		"""
+		[root]
+		left, right
+		left, right
+		left, right
+		leaf
+
 		Returns a merkle path from root, to n, depth coordinates.
 		The format of the path is an array of [LEFT VALUE, RIGHT VALUE].
 		Except the first value is the leaf hash since this is not clear otherwise.
@@ -172,19 +177,24 @@ class SMT:
 		"""
 		m = int_to_binarray(n, depth)
 		path = []
+		position = []
 
-		while len(m) > 0:
-			m = m[:-1]
-			left = m + [0]
-			right = m + [1]
+		while True:
+			if len(m) == 0:
+				break
+			left = position + [0]
+			right = position + [1]
 
 			# if self.coordinate_is_empty(m):
 			# 	path.
 			path.append([self.read_hash(left), self.read_hash(right)])
+			position += [m.pop(0)]
+
 
 		path.append(self.read_hash(int_to_binarray(n, depth)))
 
-		return path
+		return path[::-1]
+
 
 	def root(self):
 		return self.hashes[()]
@@ -205,7 +215,7 @@ class SMT:
 		dump = self.sparse_dump()
 		dump['max_depth'] = self.max_depth
 		s = str(json.dumps(dump))
-		zs = zlib.compress(s)
+		zs = zlib.compress(s.encode())
 		return base64.b64encode(zs)
 
 	def from_string(self, dump):

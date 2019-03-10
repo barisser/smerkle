@@ -44,7 +44,7 @@ def test_memberships():
 	for i in range(1000):
 		m = random.randint(0, 2**depth-1)
 		path = tree.path(n, depth)
-		import pdb;pdb.set_trace()
+#		import pdb;pdb.set_trace()
 
 
 def test_perf():
