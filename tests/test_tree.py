@@ -11,7 +11,7 @@ def test_creation_of_tree():
 	for i in range(100):
 		m = i * 130
 		tree.add_node(m, 40, str(i) + 'hello')
-	assert tree.root() == '48a827461588ee41a40cc2e102a4c996291eff1cf159a85927e1b96b4334f5a1'
+	assert tree.root() == '6da37977c157bbe64d16d521c9dd31c31856242ed5b9c6d0ab42f9603f332569'
 
 	for i in range(100):
 		m = i * 130
@@ -32,8 +32,10 @@ def test_memberships():
 		n = random.randint(0, 2**depth-1)
 		value = str(i)
 		path = tree.add_node(n, depth, value)
+		assert len(path) == depth + 1 # these are all occupied
 		assert tree.path(n, depth) == path
 		assert smerkle.verify_membership(value, path, tree.root())
+		assert not smerkle.verify_nonmembership(path, tree.root(), depth)
 		assert not smerkle.verify_membership(value, path, 'asdasd')
 		assert not smerkle.verify_membership('asdasd', path, tree.root())
 		fakepath = copy.copy(path)
@@ -43,9 +45,14 @@ def test_memberships():
 
 	for i in range(1000):
 		m = random.randint(0, 2**depth-1)
-		path = tree.path(n, depth)
-#		import pdb;pdb.set_trace()
+		path = tree.path(m, depth)
+		assert smerkle.verify_path(path, tree.root())
+		assert smerkle.verify_nonmembership(path, tree.root(), depth)
 
+		import pdb;pdb.set_trace()
+
+
+	
 
 def test_perf():
 	tree = smerkle.SMT()

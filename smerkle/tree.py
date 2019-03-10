@@ -5,6 +5,8 @@ import json
 import zlib
 
 DEFAULT_HASH_FUNCTION = lambda x: hashlib.sha256(str(x).encode()).hexdigest()
+MAX_DEPTH = 64
+KNOWN_RANDOMNESS = "0122145a87e25335b71ee0562fc590e4b3754f1b8feb06a44ecdb22ec996cfa4" # this value can't be inserted into the tree.
 
 def int_to_binarray(x, d):
 	"""
@@ -27,9 +29,22 @@ def binarray_to_int(x):
 	return s
 
 
-def verify_path(path, root, hashfunction=DEFAULT_HASH_FUNCTION):
-	if not path[0] in path[1]:
+# initialize known empty hashes
+empty_hashes = dict()
+empty_hashes[MAX_DEPTH] = DEFAULT_HASH_FUNCTION(str(MAX_DEPTH) + KNOWN_RANDOMNESS)
+# cache empty hashes for all depths
+for i in range(1, MAX_DEPTH + 1):
+	j = MAX_DEPTH - i
+	empty_hashes[j] = DEFAULT_HASH_FUNCTION(empty_hashes[j+1] * 2)
+empty_hash_values = set(empty_hashes.values())
+
+
+def verify_path(path, root, hashfunction=DEFAULT_HASH_FUNCTION, max_depth=MAX_DEPTH):
+	
+	if not path[0] in path[1] and len(path[0]) == 1:
 		return False
+	# elif not (path[0][0] in empty_hash_values and path[0][1] in empty_hash_values):
+	# 	return False
 
 	for i in range(1, len(path) - 1):
 		left = path[i][0]
@@ -82,10 +97,16 @@ def verify_membership(value, path, root, depth=None, n=None, hashfunction=DEFAUL
 
 	return verify_leaf and path_valid
 
+def verify_nonmembership(path, root, depth):
+	goodpath = verify_path(path, root)
+	not_a_member = len(path) != depth + 1
+
+	# todo some kind of infer position, assure that path agrees with (n, depth)
+	return goodpath and not_a_member
 
 
 class SMT:
-	def __init__(self, max_depth=64, hashfunction=DEFAULT_HASH_FUNCTION, dump=None):
+	def __init__(self, max_depth=MAX_DEPTH, hashfunction=DEFAULT_HASH_FUNCTION, dump=None):
 		self.hashes = {}
 		self.n_elements = 0
 		self.max_depth = max_depth
@@ -93,12 +114,14 @@ class SMT:
 		self.leaf_nodes = set()
 		
 		self.empty_hashes = dict()
-		self.empty_hashes[max_depth] = self.hash(max_depth)
+		self.empty_hashes[max_depth] = self.hash(str(max_depth) + KNOWN_RANDOMNESS)
 
 		# cache empty hashes for all depths
-		for i in range(1, max_depth):
+		for i in range(1, max_depth + 1):
 			j = max_depth - i
 			self.empty_hashes[j] = self.hash(self.empty_hashes[j+1] * 2)
+
+		self.empty_hash_values = set(self.empty_hashes.values())
 
 		if dump is not None:
 			self.from_string(dump)
@@ -127,7 +150,7 @@ class SMT:
 
 		self.hashes[tuple(m)] = self.hash(value) if hash else value
 		self.leaf_nodes.add((n, depth))
-		path = [self.hashes[tuple(m)]]
+		#path = [self.hashes[tuple(m)]]
 
 		while len(m) > 0:
 			m = m[:-1]
@@ -136,10 +159,10 @@ class SMT:
 			lhash = self.read_hash(left)
 			rhash = self.read_hash(right)
 			self.hashes[tuple(m)] = self.hash(lhash + rhash)
-			path.append([lhash, rhash])
+			#path.append([lhash, rhash])
 
 		self.n_elements += 1
-		return path
+		return self.path(n, depth)
 
 
 	def add_to_next_leaf(self, value):
@@ -160,7 +183,7 @@ class SMT:
 		return
 
 
-	def path(self, n, depth):
+	def path(self, n, depth, full=False):
 		"""
 		[root]
 		left, right
@@ -173,27 +196,30 @@ class SMT:
 		Except the first value is the leaf hash since this is not clear otherwise.
 		The root hash is ommitted because it is implied by final left-right pair.
 
+		if FULL is False, as is default, path will be truncated if empty hashes are found.
+		Full = True will print empty hashes as well.
+
 		If N, depth is NULL, or any parents are NULL, provides whatever path is possible until default null values are hit.
 		"""
 		m = int_to_binarray(n, depth)
-		path = []
-		position = []
+		h = self.read_hash(m)
+		if h not in self.empty_hash_values:
+			path = [self.read_hash(m)]
+		else:
+			path = []
 
+		# leaf to root
 		while True:
+			left = m[:-1] + [0]
+			right = m[:-1] + [1]
+			lefth = self.read_hash(left)
+			righth = self.read_hash(right)
+			if not (lefth in self.empty_hash_values and righth in self.empty_hash_values):
+				path.append([lefth, righth])
+			m = m[:-1]
 			if len(m) == 0:
 				break
-			left = position + [0]
-			right = position + [1]
-
-			# if self.coordinate_is_empty(m):
-			# 	path.
-			path.append([self.read_hash(left), self.read_hash(right)])
-			position += [m.pop(0)]
-
-
-		path.append(self.read_hash(int_to_binarray(n, depth)))
-
-		return path[::-1]
+		return path
 
 
 	def root(self):
