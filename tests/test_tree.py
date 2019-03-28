@@ -5,6 +5,7 @@ import time
 
 import smerkle
 
+
 def test_creation_of_tree():
 	tree = smerkle.SMT()
 
