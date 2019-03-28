@@ -4,6 +4,7 @@ import random
 
 import smerkle
 
+
 def test_mod_exp():
     for _ in range(100):
         a = smerkle.get_prime(digits=8, strong=False)
@@ -57,6 +58,7 @@ def test_many_memberships():
 
     for v in values:
         assert smerkle.verify_hash_membership(acc, v, values[v], n)
+
 
 def test_add_many_memberships():
     digits = 64
