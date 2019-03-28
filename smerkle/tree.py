@@ -40,7 +40,7 @@ empty_hash_values = set(empty_hashes.values())
 
 
 def verify_path(path, root, hashfunction=DEFAULT_HASH_FUNCTION, max_depth=MAX_DEPTH):
-	
+
 	if not path[0] in path[1] and len(path[0]) == 1:
 		return False
 	# elif not (path[0][0] in empty_hash_values and path[0][1] in empty_hash_values):
@@ -52,7 +52,7 @@ def verify_path(path, root, hashfunction=DEFAULT_HASH_FUNCTION, max_depth=MAX_DE
 		expected_parent = hashfunction(left + right)
 		if expected_parent not in path[i+1]:
 			return False
-	
+
 	if not hashfunction(path[-1][0] + path[-1][1]) == root:
 		return False
 
@@ -112,7 +112,7 @@ class SMT:
 		self.max_depth = max_depth
 		self.hash = hashfunction
 		self.leaf_nodes = set()
-		
+
 		self.empty_hashes = dict()
 		self.empty_hashes[max_depth] = self.hash(str(max_depth) + KNOWN_RANDOMNESS)
 
