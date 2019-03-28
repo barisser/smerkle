@@ -8,6 +8,7 @@ DEFAULT_HASH_FUNCTION = lambda x: hashlib.sha256(str(x).encode()).hexdigest()
 MAX_DEPTH = 64
 KNOWN_RANDOMNESS = "0122145a87e25335b71ee0562fc590e4b3754f1b8feb06a44ecdb22ec996cfa4" # this value can't be inserted into the tree.
 
+
 def int_to_binarray(x, d):
 	"""
 	Finds the pathway for the X'th item in row D using zero based indexing.
@@ -96,6 +97,7 @@ def verify_membership(value, path, root, depth=None, n=None, hashfunction=DEFAUL
 	# todo additional checks for position.
 
 	return verify_leaf and path_valid
+
 
 def verify_nonmembership(path, root, depth):
 	goodpath = verify_path(path, root)
