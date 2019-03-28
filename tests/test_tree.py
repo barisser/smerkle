@@ -49,7 +49,7 @@ def test_memberships():
 		assert smerkle.verify_path(path, tree.root())
 		assert smerkle.verify_nonmembership(path, tree.root(), depth)
 
-		import pdb;pdb.set_trace()
+		import pdb; pdb.set_trace()
 
 
 	
