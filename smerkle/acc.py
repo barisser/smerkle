@@ -4,6 +4,7 @@ import math
 
 from Crypto.Util import number
 
+
 def get_prime(digits=512, strong=True):
     if strong:
         return number.getStrongPrime(digits)
@@ -11,6 +12,7 @@ def get_prime(digits=512, strong=True):
         return number.getPrime(digits)
 
 # Cryptographic Accumulators
+
 
 def mod_exp(a, b, n):
     """
@@ -122,6 +124,7 @@ def compute_non_membership_witness(acc, value, g, n, values):
     assert verify_non_membership(acc, a2, d, value, g, n)
     return a2, d
 
+
 def verify_non_membership_old(acc, witness_a, witness_d, value, g, n):
     left = mod_exp(acc, witness_a, n)
     right = (mod_exp(witness_d, value, n) * (g % n)) % n
@@ -142,6 +145,7 @@ def xgcd(b, n):
         x0, x1 = x1, x0 - q * x1
         y0, y1 = y1, y0 - q * y1
     return  b, x0, y0
+
 
 def mod_inverse(a, n):
     # ax + by = gcd(a, b)
