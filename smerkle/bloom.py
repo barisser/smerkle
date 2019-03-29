@@ -69,4 +69,3 @@ class BF:
 		b = format(i, "b")
 		b = "0" * (len(self.array) - len(b)) + b
 		self.array = [int(x) for x in b]
-
