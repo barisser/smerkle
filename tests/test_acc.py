@@ -23,10 +23,10 @@ def test_mod_exp():
     assert (a * b) % n == ((a % n) * (b % n)) % n
 
     # (a**b) mod n == ((a mod n)**b) mod n
-    # thus 
+    # thus
     # (a**(b*c)) mod n = ((a**b mod n)**c) mod n
     # thus
-    # mod_exp (a, b*c, n) = 
+    # mod_exp (a, b*c, n) =
     # mod_exp(mod_exp(a, b, n), c, n)
 
     assert smerkle.mod_exp(smerkle.mod_exp(a, b, n), c, n) == smerkle.mod_exp(a, c * b, n)
@@ -74,7 +74,7 @@ def test_add_many_memberships():
 #     n = smerkle.get_prime(digits=digits, strong=False)
 
 #     acc, witnesses = smerkle.add_many_memberships(g, values, n)
-#     #import pdb;pdb.set_trace()    
+#     #import pdb;pdb.set_trace()
 #     for v, wit in witnesses.iteritems():
 #         assert smerkle.verify_membership(acc, v, wit, n)
 
