@@ -27,7 +27,7 @@ def test_creation_of_tree():
 def test_memberships():
 	tree = smerkle.SMT()
 	depth = 64
-	
+
 	for i in range(100):	
 		n = random.randint(0, 2**depth-1)
 		value = str(i)
@@ -52,7 +52,7 @@ def test_memberships():
 		import pdb;pdb.set_trace()
 
 
-	
+
 
 def test_perf():
 	tree = smerkle.SMT()
