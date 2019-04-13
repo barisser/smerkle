@@ -1,6 +1,4 @@
 """Main Library for Pyproofs"""
-import hashlib
-import math
 
 from Crypto.Util import number
 
@@ -45,11 +43,7 @@ def verify_hash_membership(acc, value, witness, n):
 def add_many_memberships(acc, values, n):
     witnesses = {}
     u = acc
-    cumulative_witnesses = []
-    reverse_cumulative_witnesses = []
 
-    asc_acc = acc
-    desc_acc = acc
     for i in range(len(values)):
         my_witness = acc
         for j in range(len(values)): # inefficient
