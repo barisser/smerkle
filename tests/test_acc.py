@@ -79,4 +79,3 @@ def test_add_many_memberships():
 #         assert smerkle.verify_membership(acc, v, wit, n)
 
 #     w = smerkle.compute_non_membership_witness(acc, value, g, n, values)
-
