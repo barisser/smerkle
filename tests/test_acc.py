@@ -1,5 +1,4 @@
 """Tests functions in main.py"""
-import hashlib
 import random
 
 import smerkle
