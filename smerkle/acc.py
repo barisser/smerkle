@@ -1,6 +1,4 @@
 """Main Library for Pyproofs"""
-import hashlib
-import math
 
 from Crypto.Util import number
 
