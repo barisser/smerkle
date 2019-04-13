@@ -44,7 +44,7 @@ class BF:
 		self.n_elements += 1
 		if self.n_elements > self.max_elements:
 			raise Exception("Cannot exceed max elements in Bloom Filter.")
-		
+
 		for i in range(self.k):
 			hv = int(self.hash_functions[i](value), 16) % self.m
 			self.array[hv] = 1
@@ -69,4 +69,4 @@ class BF:
 		b = format(i, "b")
 		b = "0" * (len(self.array) - len(b)) + b
 		self.array = [int(x) for x in b]
-		
+
