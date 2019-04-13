@@ -23,7 +23,7 @@ def mod_exp(a, b, n):
     k = {0: a % n}
 
     for i in range(1, len(bc)):
-        k[i] = (k[i-1] ** 2) % n       
+        k[i] = (k[i-1] ** 2) % n
 
     r = 1
     for m in range(len(bc)):
