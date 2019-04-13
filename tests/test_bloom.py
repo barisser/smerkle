@@ -16,5 +16,5 @@ def test_bloom_filter():
 	for i in range(n, int(n + (1 / p) / 1000)):
 		assert not bf.check(str(i))
 
-	root = bf.to_string()
-	barray = bf.array
+	bf.to_string()
+	bf.array
