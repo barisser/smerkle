@@ -9,9 +9,8 @@ setup(name='smerkle',
       license='MIT',
       packages=find_packages(),
       install_requires=[
-            'ecdsa>=0.13',
-            'pybitcoin',
-            'pycrypto'
+          'ecdsa>=0.13',
+          'pybitcoin',
+          'pycrypto'
       ]
       )
-   
