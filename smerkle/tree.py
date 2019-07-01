@@ -3,7 +3,7 @@ import copy
 import hashlib
 import json
 import zlib
-
+  
 DEFAULT_HASH_FUNCTION = lambda x: hashlib.sha256(str(x).encode()).hexdigest()
 MAX_DEPTH = 64
 KNOWN_RANDOMNESS = "0122145a87e25335b71ee0562fc590e4b3754f1b8feb06a44ecdb22ec996cfa4" # this value can't be inserted into the tree.
