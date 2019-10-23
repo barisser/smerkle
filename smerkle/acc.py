@@ -112,11 +112,11 @@ def compute_non_membership_witness(acc, value, g, n, values):
         assert b2 > 0
         assert a2 > 0
     except:
-        import pdb;pdb.set_trace()
+        import pdb; pdb.set_trace()
     try:
         assert a2 * value + b2 * u == 1
     except:
-        import pdb;pdb.set_trace()
+        import pdb; pdb.set_trace()
     assert a * value + b * u == 1
 
     d = mod_inverse(mod_exp(g, b2, n), n)
@@ -128,7 +128,7 @@ def compute_non_membership_witness(acc, value, g, n, values):
 def verify_non_membership_old(acc, witness_a, witness_d, value, g, n):
     left = mod_exp(acc, witness_a, n)
     right = (mod_exp(witness_d, value, n) * (g % n)) % n
-    import pdb;pdb.set_trace()
+    import pdb; pdb.set_trace()
     return left == right
 
     
