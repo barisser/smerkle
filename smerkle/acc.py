@@ -70,9 +70,9 @@ def add_many_memberships(acc, values, n):
 
 def compute_non_membership_witness(acc, value, g, n, values):
     # WIP, CURRENTLY BROKEN
-    
+
     # https://www.cs.purdue.edu/homes/ninghui/papers/accumulator_acns07.pdf
-    
+
     # u = multiple of all values in set
     # all values are primes
     # non-member value is X
@@ -89,7 +89,7 @@ def compute_non_membership_witness(acc, value, g, n, values):
     # to verify just show that c^a mod n == d^x * g mod n
 
     assert not value in values
-    
+
     u = 1
     for x in values:
         u = u * x
@@ -107,7 +107,7 @@ def compute_non_membership_witness(acc, value, g, n, values):
     k = max(a_diff, b_diff)
     a2 = a + k * u
     b2 = b - k * value
-    
+
     try:
         assert b2 > 0
         assert a2 > 0
@@ -131,7 +131,7 @@ def verify_non_membership_old(acc, witness_a, witness_d, value, g, n):
     import pdb;pdb.set_trace()
     return left == right
 
-    
+
 
 def xgcd(b, n):
     """
